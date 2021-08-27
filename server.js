@@ -162,7 +162,7 @@ function addItem(selection) {
             },
          ]).then(function (answers) {
             connect.query("SELECT role_id FROM roles WHERE title='" + answers.title + "'",
-               function (err,data) {
+               function (err, data) {
                   if (err) throw err;
                   roleCount = parseInt(data[0].role_id);
                   connect.query("SELECT department_id FROM departments WHERE department='" + answers.department + "'",
@@ -189,59 +189,131 @@ function addItem(selection) {
             );
          });
          break;
-         case "roles":
-            inquirer.prompt([
-               {
-                  type: "input",
-                  name: "title",
-                  message: "Please enter the name of the Role",
-               },
-               {
-                  type: "number",
-                  name: "salary",
-                  message: "Please enter the Salary related to this position",
-               },
-               {
-                  type: "list",
-                  name: "department",
-                  message: "What department will this role be under?",
-                  choices: departmentsArr,
-               },
-            ]).then(function (answers) {
-               let deptCount;
-               connect.query("SELECT department_id FROM departments WHERE department='" + answers.department + "'",
-                  function (err, data) {
-                     if (err) throw err;
-                     deptCount = parseInt(data[0].department_id);
-                     connect.query("INSERT INTO roles(title, salary, department_id) VALUES (?,?,?)",
-                        [answers.title, answers.salary, deptCount],
-                        function (err, data) {
-                           if (err) throw err;
-                           console.log("Role Added!");
-                           init();
-                        }
-                     );
-                  }
-               );
-            });
-            break;
-            case "departments":
-               inquirer.prompt([
-                  {
-                     type: "input",
-                     name: "department",
-                     message: "Please enter the name of the Department",
-                  },
-               ]).then(function (answers) {
-                  connection.query("INSERT INTO departments (department) VALUES (?)",
-                     [answers.department],
-                     function (err, res) {
+      case "roles":
+         inquirer.prompt([
+            {
+               type: "input",
+               name: "title",
+               message: "Please enter the name of the Role",
+            },
+            {
+               type: "number",
+               name: "salary",
+               message: "Please enter the Salary related to this position",
+            },
+            {
+               type: "list",
+               name: "department",
+               message: "What department will this role be under?",
+               choices: departmentsArr,
+            },
+         ]).then(function (answers) {
+            let deptCount;
+            connect.query("SELECT department_id FROM departments WHERE department='" + answers.department + "'",
+               function (err, data) {
+                  if (err) throw err;
+                  deptCount = parseInt(data[0].department_id);
+                  connect.query("INSERT INTO roles(title, salary, department_id) VALUES (?,?,?)",
+                     [answers.title, answers.salary, deptCount],
+                     function (err, data) {
                         if (err) throw err;
-                        console.log("Department Added!");
+                        console.log("Role Added!");
                         init();
                      }
                   );
-               });
-               break;
+               }
+            );
+         });
+         break;
+      case "departments":
+         inquirer.prompt([
+            {
+               type: "input",
+               name: "department",
+               message: "Please enter the name of the Department",
+            },
+         ]).then(function (answers) {
+            connection.query("INSERT INTO departments (department) VALUES (?)",
+               [answers.department],
+               function (err, res) {
+                  if (err) throw err;
+                  console.log("Department Added!");
+                  init();
+               }
+            );
+         });
+         break;
+   }
+}
+
+function removeItem(selection) {
+   switch (selection) {
+      case "employees":
+         inquirer.prompt([
+            {
+               type: "list",
+               name: "employee",
+               message: "What employee would you like to remove?",
+               choices: employeeArr,
+            },
+         ]).then((answers) => {
+            let employeeIndex = employeeArr.indexOf(answers.employee);
+            employeeId = employeeArr[employeeIndex];
+            connect.query("DELETE FROM employees WHERE employee_id=?", [employeeId],
+               function (err, data) {
+                  if (err) throw err;
+                  console.log("Employee Removed from Database!");
+               }
+            );
+            init()
+         });
+         break;
+      case "roles":
+         inquirer.prompt([
+            {
+               type: "list",
+               name: "title",
+               message: "What role would you like to remove?",
+               choices: rolesArr,
+            },
+         ]).then(function (answers) {
+            connection.query(
+               "DELETE FROM roles WHERE title=?",
+               [answers.title],
+               (err, res) => {
+                  if (err) throw err;
+                  console.log("Role has been deleted from Database!");
+                  init()
+               }
+            );
+         });
+         break;
+      case "department":
+         inquirer.prompt([
+            {
+               type: "list",
+               name: "department",
+               message: "Which department would you like to remove?",
+               choices: departmentsArr,
+            },
+         ]).then(function (answers) {
+            connection.query(
+               "SELECT department_id FROM departments WHERE department=?",
+               [answers.department],
+               (err, res) => {
+                  if (err) throw err;
+                  connection.query(
+                     "DELETE FROM departments WHERE department_id=?",
+                     [res.department_id],
+                     function (err, res) {
+                        if (err) throw err;
+                        console.log("Department Deleted!");
+                        init()
+                     }
+                  );
+               }
+            );
+         });
+         break;
    }
 }
