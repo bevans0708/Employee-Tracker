@@ -1,6 +1,5 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
-const { createConnection } = require("net");
 const connect = mysql.createConnection({
    host: "localhost",
    port: 3306,
