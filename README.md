@@ -1,5 +1,8 @@
 # Employee Tracker
 
+   ## Link to Video Example
+   https://www.youtube.com/watch?v=8b5nwNSbxcM
+
    ## Description
    This application is designed to help keep track of all employees, roles and departments within a company. You have the ability to Add and remove Employees, Roles, and Departments within the organization and well and assign salaries to roles.
 
