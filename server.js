@@ -1,3 +1,4 @@
+const cTable = require("console.table");
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 const connect = mysql.createConnection({
@@ -59,7 +60,7 @@ function init() {
                   case "View All Employees":
                      connect.query("SELECT employees.employee_id, employees.first_name, employees.last_name, departments.department, roles.title, roles.salary FROM employees INNER JOIN departments ON employees.department_id=departments.department_id INNER JOIN roles ON employees.role_id=roles.role_id", function (err, data) {
                         if (err) throw err;
-                        console.log(data);
+                        console.table(data);
                         init();
                      }
                      );
@@ -121,11 +122,11 @@ function byDeptOrRole(col, table, deptOrRole) {
          type: "list",
          choices: choicesArr,
       }).then((answers) => {
-         connect.query("SELECT employee.employee_id, employees.first_name, employees.last_name, departments.department, roles.title, roles.salary FROM employees INNER JOIN departments ON employees.department_id=departments.department_id INNER JOIN roles ON employees.role_id=roles.role_id WHERE ??.?? = ?",
+         connect.query("SELECT employees.employee_id, employees.first_name, employees.last_name, departments.department, roles.title, roles.salary FROM employees INNER JOIN departments ON employees.department_id=departments.department_id INNER JOIN roles ON employees.role_id=roles.role_id WHERE ??.?? = ?",
             [table, col, answers.deptRoleSelection],
             function (err, data) {
                if (err) throw err;
-               console.log(data);
+               console.table(data);
                init();
             }
          );
@@ -157,7 +158,7 @@ function addItem(selection) {
                type: "list",
                name: "department",
                message: "Please enter the Employee's Department",
-               choices: departmentArr,
+               choices: departmentsArr,
             },
          ]).then(function (answers) {
             connect.query("SELECT role_id FROM roles WHERE title='" + answers.title + "'",
@@ -232,7 +233,7 @@ function addItem(selection) {
                message: "Please enter the name of the Department",
             },
          ]).then(function (answers) {
-            connection.query("INSERT INTO departments (department) VALUES (?)",
+            connect.query("INSERT INTO departments (department) VALUES (?)",
                [answers.department],
                function (err, res) {
                   if (err) throw err;
@@ -257,11 +258,11 @@ function removeItem(selection) {
             },
          ]).then((answers) => {
             let employeeIndex = employeeArr.indexOf(answers.employee);
-            employeeId = employeeArr[employeeIndex];
+            employeeId = employeeIdArr[employeeIndex];
             connect.query("DELETE FROM employees WHERE employee_id=?", [employeeId],
                function (err, data) {
                   if (err) throw err;
-                  console.log("Employee Removed from Database!");
+                  console.log("Employee has been deleted from Database!");
                }
             );
             init()
@@ -276,7 +277,7 @@ function removeItem(selection) {
                choices: rolesArr,
             },
          ]).then(function (answers) {
-            connection.query(
+            connect.query(
                "DELETE FROM roles WHERE title=?",
                [answers.title],
                (err, res) => {
@@ -296,17 +297,17 @@ function removeItem(selection) {
                choices: departmentsArr,
             },
          ]).then(function (answers) {
-            connection.query(
+            connect.query(
                "SELECT department_id FROM departments WHERE department=?",
                [answers.department],
                (err, res) => {
                   if (err) throw err;
-                  connection.query(
+                  connect.query(
                      "DELETE FROM departments WHERE department_id=?",
                      [res.department_id],
                      function (err, res) {
                         if (err) throw err;
-                        console.log("Department Deleted!");
+                        console.log("Departmenthas been deleted from Database!");
                         init()
                      }
                   );
